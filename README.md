@@ -1,32 +1,54 @@
-# Driver Transportation Website Template – Premium Edition
+# Driver Transfer Platform
 
-This repository contains the first implementation deliverable for the premium transportation website template described in the project brief.
+This project is a PHP + MySQL transportation booking website with a premium responsive landing page, full booking flow, admin dashboard, and API endpoints for operational automation.
 
 ## Included
 
-- Technical implementation plan and business architecture
-- Database schema blueprint for a multi-service transport system
-- Premium responsive landing page prototype for the brand direction
-- Interaction layer for mobile nav, FAQ, counters, and booking UI feedback
+- Public homepage and service pages
+- Booking form with backend processing
+- Admin dashboard and management screens
+- JSON API endpoints for health and data access
+- MySQL schema for bookings, vehicles, drivers, routes, and admin users
+- Mobile-first responsive design built for phone-first UX
 
-## Structure
+## Project structure
 
-- `docs/technical-plan.md` – system architecture, module list, workflow, UI strategy, deployment roadmap
-- `docs/db-schema.sql` – starter database schema blueprint
-- `index.html` – homepage prototype and premium landing page
-- `styles.css` – design system and premium interface styling
-- `script.js` – interactive behavior and booking micro-interactions
+- `index.php` – landing page and booking entry
+- `services.php` – service overview page
+- `routes.php` – route catalog page
+- `fleet.php` – vehicle catalog page
+- `pricing.php` – pricing page
+- `contact.php` – contact page
+- `booking.php` – booking confirmation page
+- `admin/` – admin dashboard and management pages
+- `api/` – JSON API endpoints
+- `includes/` – configuration, DB access, and shared functions
+- `assets/css/app.css` – site styling
+- `assets/js/app.js` – frontend interactivity
+- `db-schema.sql` – starter schema for MySQL
+- `docs/technical-plan.md` – architecture reference
 
-## Run locally
+## Admin access
 
-Use any static web server:
+Default admin credentials:
+
+- Username: `admin`
+- Password: `admin123`
+
+## Local run
+
+A local PHP runtime is required. If PHP is installed, start the site with:
 
 ```bash
-python -m http.server 3000
+php -S 127.0.0.1:8000
 ```
 
-Then open: http://localhost:3000
+Then open:
 
-## Current status
+- http://127.0.0.1:8000/
+- http://127.0.0.1:8000/admin/login.php
 
-This is the foundation phase. The project remains structured for the next steps: database-driven booking engine, admin dashboard, CMS, pricing engine, and multi-tenant configuration layer.
+## Notes
+
+- The app is built to work with MySQL if the database is configured in environment variables or defaults.
+- If MySQL is unavailable, the app falls back to sample data so the storefront and admin screens can still demonstrate the flow.
