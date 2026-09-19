@@ -262,6 +262,89 @@ function getDriverStatusMachine(): array
     ];
 }
 
+function customerIsLoggedIn(): bool
+{
+    return !empty($_SESSION['customer_logged_in']) && !empty($_SESSION['customer_user']);
+}
+
+function driverIsLoggedIn(): bool
+{
+    return !empty($_SESSION['driver_logged_in']) && !empty($_SESSION['driver_user']);
+}
+
+function requireCustomerLogin(): void
+{
+    if (!customerIsLoggedIn()) {
+        redirect('/customer/login.php');
+    }
+}
+
+function requireDriverLogin(): void
+{
+    if (!driverIsLoggedIn()) {
+        redirect('/driver/login.php');
+    }
+}
+
+function loginCustomer(array $user): void
+{
+    $_SESSION['customer_logged_in'] = true;
+    $_SESSION['customer_user'] = [
+        'id' => (int) ($user['id'] ?? 0),
+        'name' => (string) ($user['name'] ?? 'Khách hàng'),
+        'email' => (string) ($user['email'] ?? ''),
+        'role' => 'customer',
+    ];
+}
+
+function loginDriver(array $user): void
+{
+    $_SESSION['driver_logged_in'] = true;
+    $_SESSION['driver_user'] = [
+        'id' => (int) ($user['id'] ?? 0),
+        'name' => (string) ($user['name'] ?? 'Tài xế'),
+        'phone' => (string) ($user['phone'] ?? ''),
+        'role' => 'driver',
+    ];
+}
+
+function verifyCustomerCredentials(string $email, string $password): ?array
+{
+    $normalizedEmail = strtolower(trim($email));
+    if ($normalizedEmail === 'customer@demo.com' && $password === 'customer123') {
+        return ['id' => 1, 'name' => 'Khách hàng Demo', 'email' => 'customer@demo.com', 'role' => 'customer'];
+    }
+
+    return null;
+}
+
+function verifyDriverCredentials(string $phone, string $password): ?array
+{
+    $normalizedPhone = trim($phone);
+    if ($normalizedPhone === '0909000001' && $password === 'driver123') {
+        return ['id' => 1, 'name' => 'Tài xế Demo', 'phone' => '0909000001', 'role' => 'driver'];
+    }
+
+    return null;
+}
+
+function getCustomerTrips(): array
+{
+    return [
+        ['id' => 1001, 'pickup' => 'Sân bay Đà Nẵng', 'destination' => 'Phố cổ Hội An', 'status' => 'in_trip', 'price' => '1.200.000đ'],
+        ['id' => 1002, 'pickup' => 'Bến xe trung tâm', 'destination' => 'Đà Nẵng', 'status' => 'completed', 'price' => '420.000đ'],
+        ['id' => 1003, 'pickup' => 'Huế', 'destination' => 'Đà Nẵng', 'status' => 'pending', 'price' => '900.000đ'],
+    ];
+}
+
+function getDriverTrips(): array
+{
+    return [
+        ['id' => 2001, 'pickup' => 'Sân bay Đà Nẵng', 'destination' => 'Hội An', 'status' => 'accepted', 'customer' => 'Nguyễn A'],
+        ['id' => 2002, 'pickup' => 'Đà Nẵng', 'destination' => 'Huế', 'status' => 'in_trip', 'customer' => 'Trần B'],
+    ];
+}
+
 function getDispatchCandidates(string $vehicleType, int $passengers): array
 {
     $drivers = [
@@ -332,6 +415,81 @@ function getPaymentMethods(): array
     ];
 }
 
+function getVerificationStatusMachine(): array
+{
+    return [
+        'pending' => 'Chờ xác minh',
+        'verified' => 'Đã xác minh',
+        'rejected' => 'Từ chối',
+        'suspended' => 'Tạm khóa',
+    ];
+}
+
+function processTripPayment(array $payment): array
+{
+    $bookingId = (int) ($payment['booking_id'] ?? 0);
+    $amount = (float) ($payment['amount'] ?? 0);
+    $method = safeString($payment['payment_method'] ?? 'cash');
+
+    if ($bookingId <= 0 || $amount <= 0) {
+        return ['success' => false, 'message' => 'Thông tin thanh toán không hợp lệ.'];
+    }
+
+    if (!dbConnected()) {
+        return [
+            'success' => true,
+            'payment_status' => 'paid',
+            'message' => 'Thanh toán đã được ghi nhận trong chế độ demo.',
+            'reference' => 'DEMO-' . $bookingId,
+        ];
+    }
+
+    try {
+        $pdo = getPdo();
+        $reference = strtoupper(bin2hex(random_bytes(6)));
+        $statement = $pdo->prepare(
+            'INSERT INTO trip_payments (booking_id, amount, payment_method, payment_status, transaction_reference) VALUES (:booking_id, :amount, :payment_method, :payment_status, :transaction_reference)'
+        );
+        $statement->execute([
+            ':booking_id' => $bookingId,
+            ':amount' => $amount,
+            ':payment_method' => $method,
+            ':payment_status' => 'paid',
+            ':transaction_reference' => $reference,
+        ]);
+
+        return [
+            'success' => true,
+            'payment_status' => 'paid',
+            'message' => 'Thanh toán đã được xác nhận.',
+            'reference' => $reference,
+        ];
+    } catch (Throwable $e) {
+        return ['success' => false, 'message' => 'Không thể xử lý thanh toán.'];
+    }
+}
+
+function getDriverVerificationList(): array
+{
+    return [
+        ['id' => 1, 'driver_name' => 'Nguyễn Văn A', 'document' => 'CCCD', 'status' => 'verified'],
+        ['id' => 2, 'driver_name' => 'Trần Văn B', 'document' => 'GPLX', 'status' => 'pending'],
+        ['id' => 3, 'driver_name' => 'Lê Thị C', 'document' => 'Bằng lái', 'status' => 'rejected'],
+    ];
+}
+
+function updateDriverVerificationStatus(int $driverId, string $status): array
+{
+    $normalizedStatus = strtolower(trim($status));
+    $allowed = array_keys(getVerificationStatusMachine());
+
+    if (!in_array($normalizedStatus, $allowed, true)) {
+        return ['success' => false, 'message' => 'Trạng thái xác minh không hợp lệ.'];
+    }
+
+    return ['success' => true, 'message' => 'Cập nhật trạng thái xác minh thành công.', 'status' => $normalizedStatus];
+}
+
 function buildTripDispatchSummary(array $booking): array
 {
     $distanceKm = (float) ($booking['distance_km'] ?? 18.5);
@@ -389,6 +547,17 @@ function getServiceTypes(): array
     ];
 }
 
+function getPricingRules(): array
+{
+    return [
+        ['vehicle_type' => 'sedan', 'base_fee' => 180000, 'per_km_rate' => 18000, 'per_minute_rate' => 2600, 'waiting_fee_per_minute' => 3500, 'night_surcharge' => 30000, 'airport_surcharge' => 50000, 'holiday_surcharge' => 20000, 'min_fare' => 150000],
+        ['vehicle_type' => 'suv', 'base_fee' => 260000, 'per_km_rate' => 22000, 'per_minute_rate' => 3200, 'waiting_fee_per_minute' => 4500, 'night_surcharge' => 35000, 'airport_surcharge' => 60000, 'holiday_surcharge' => 25000, 'min_fare' => 200000],
+        ['vehicle_type' => 'van', 'base_fee' => 420000, 'per_km_rate' => 30000, 'per_minute_rate' => 3800, 'waiting_fee_per_minute' => 5500, 'night_surcharge' => 45000, 'airport_surcharge' => 70000, 'holiday_surcharge' => 30000, 'min_fare' => 300000],
+        ['vehicle_type' => 'limousine', 'base_fee' => 480000, 'per_km_rate' => 36000, 'per_minute_rate' => 4200, 'waiting_fee_per_minute' => 6500, 'night_surcharge' => 60000, 'airport_surcharge' => 80000, 'holiday_surcharge' => 35000, 'min_fare' => 350000],
+        ['vehicle_type' => 'rideshare', 'base_fee' => 120000, 'per_km_rate' => 14000, 'per_minute_rate' => 2100, 'waiting_fee_per_minute' => 2800, 'night_surcharge' => 20000, 'airport_surcharge' => 25000, 'holiday_surcharge' => 15000, 'min_fare' => 120000],
+    ];
+}
+
 function getBookingStatusMachine(): array
 {
     return [
@@ -437,21 +606,32 @@ function calculateTripFare(array $trip): array
     $waitingMinutes = (int) ($trip['waiting_minutes'] ?? 0);
     $passengers = max(1, (int) ($trip['passengers'] ?? 1));
 
-    $serviceMap = [
-        'sedan' => ['base' => 180000, 'per_km' => 18000, 'per_minute' => 2600, 'waiting' => 3500],
-        'suv' => ['base' => 260000, 'per_km' => 22000, 'per_minute' => 3200, 'waiting' => 4500],
-        'van' => ['base' => 420000, 'per_km' => 30000, 'per_minute' => 3800, 'waiting' => 5500],
-        'limousine' => ['base' => 480000, 'per_km' => 36000, 'per_minute' => 4200, 'waiting' => 6500],
-        'rideshare' => ['base' => 120000, 'per_km' => 14000, 'per_minute' => 2100, 'waiting' => 2800],
+    $pricingRules = getPricingRules();
+    $config = null;
+    foreach ($pricingRules as $rule) {
+        if (($rule['vehicle_type'] ?? '') === $vehicleType) {
+            $config = $rule;
+            break;
+        }
+    }
+
+    $config = $config ?? [
+        'base_fee' => 180000,
+        'per_km_rate' => 18000,
+        'per_minute_rate' => 2600,
+        'waiting_fee_per_minute' => 3500,
+        'min_fare' => 150000,
     ];
 
-    $config = $serviceMap[$vehicleType] ?? $serviceMap['sedan'];
-    $distanceFee = $distanceKm * $config['per_km'];
-    $timeFee = $minutes * $config['per_minute'];
-    $waitingFee = $waitingMinutes * $config['waiting'];
+    $distanceFee = $distanceKm * ((float) ($config['per_km_rate'] ?? 18000));
+    $timeFee = $minutes * ((float) ($config['per_minute_rate'] ?? 2600));
+    $waitingFee = $waitingMinutes * ((float) ($config['waiting_fee_per_minute'] ?? 3500));
     $extraPassengerFee = max(0, $passengers - 4) * 50000;
 
-    $total = $config['base'] + $distanceFee + $timeFee + $waitingFee + $extraPassengerFee;
+    $baseFee = (float) ($config['base_fee'] ?? 180000);
+    $minimumFare = (float) ($config['min_fare'] ?? $baseFee);
+    $total = $baseFee + $distanceFee + $timeFee + $waitingFee + $extraPassengerFee;
+    $total = max($total, $minimumFare);
 
     return [
         'vehicle_type' => $vehicleType,
@@ -459,11 +639,12 @@ function calculateTripFare(array $trip): array
         'duration_minutes' => $minutes,
         'waiting_minutes' => $waitingMinutes,
         'passengers' => $passengers,
-        'base_fee' => (int) $config['base'],
+        'base_fee' => (int) $baseFee,
         'distance_fee' => (int) $distanceFee,
         'time_fee' => (int) $timeFee,
         'waiting_fee' => (int) $waitingFee,
         'passenger_fee' => (int) $extraPassengerFee,
+        'minimum_fare' => (int) $minimumFare,
         'total_amount' => (int) $total,
     ];
 }
@@ -533,6 +714,17 @@ function handleBookingSubmission(array $post): array
     ];
 
     $booking['dispatch'] = buildTripDispatchSummary($booking);
+    $booking['payment'] = processTripPayment([
+        'booking_id' => 0,
+        'amount' => calculateTripFare([
+            'vehicle_type' => $vehicleType,
+            'distance_km' => (float) ($booking['dispatch']['eta']['distance_km'] ?? 18.5),
+            'duration_minutes' => (int) ($booking['dispatch']['eta']['eta_minutes'] ?? 35),
+            'waiting_minutes' => 0,
+            'passengers' => $passengers,
+        ])['total_amount'],
+        'payment_method' => 'cash',
+    ]);
 
     if (dbConnected()) {
         try {

@@ -12,6 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['route_submit'])) {
 }
 
 $routes = getRoutesList();
+$pricingRules = getPricingRules();
 $pageTitle = 'Quản lý tuyến đường';
 require __DIR__ . '/../includes/header.php';
 ?>
@@ -77,6 +78,19 @@ require __DIR__ . '/../includes/header.php';
                             <small><?= htmlspecialchars((string) ($route['duration'] ?? '—'), ENT_QUOTES, 'UTF-8'); ?></small>
                         </div>
                         <span><?= htmlspecialchars((string) ($route['price'] ?? '—'), ENT_QUOTES, 'UTF-8'); ?></span>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+
+            <div class="pricing-rules-wrap">
+                <h3>Quy tắc giá theo loại xe</h3>
+                <?php foreach ($pricingRules as $rule): ?>
+                    <div class="route-row">
+                        <div>
+                            <strong><?= htmlspecialchars((string) ($rule['vehicle_type'] ?? 'vehicle'), ENT_QUOTES, 'UTF-8'); ?></strong>
+                            <small>Base <?= number_format((float) ($rule['base_fee'] ?? 0), 0, ',', '.'); ?>đ</small>
+                        </div>
+                        <span><?= number_format((float) ($rule['per_km_rate'] ?? 0), 0, ',', '.'); ?>đ/km</span>
                     </div>
                 <?php endforeach; ?>
             </div>
