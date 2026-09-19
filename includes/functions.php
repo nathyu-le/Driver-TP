@@ -297,6 +297,73 @@ function assignDriverForBooking(array $booking): array
     ];
 }
 
+function getRouteEtaEstimate(array $trip): array
+{
+    $distanceKm = (float) ($trip['distance_km'] ?? 20.0);
+    $vehicleType = (string) ($trip['vehicle_type'] ?? 'sedan');
+    $speedMap = [
+        'sedan' => 32,
+        'suv' => 28,
+        'van' => 24,
+        'limousine' => 35,
+        'rideshare' => 30,
+    ];
+
+    $speed = (float) ($speedMap[$vehicleType] ?? 30);
+    $minutes = max(10, (int) round(($distanceKm / $speed) * 60));
+    $etaAt = time() + ($minutes * 60);
+    $windowAt = time() + (($minutes + 8) * 60);
+
+    return [
+        'distance_km' => $distanceKm,
+        'eta_minutes' => $minutes,
+        'eta_at' => date('Y-m-d H:i:s', $etaAt),
+        'arrival_window' => date('Y-m-d H:i:s', $windowAt),
+    ];
+}
+
+function getPaymentMethods(): array
+{
+    return [
+        ['code' => 'cash', 'label' => 'Thanh toán tiền mặt'],
+        ['code' => 'momo', 'label' => 'Ví MoMo'],
+        ['code' => 'vnpay', 'label' => 'VNPay'],
+        ['code' => 'bank_transfer', 'label' => 'Chuyển khoản ngân hàng'],
+    ];
+}
+
+function buildTripDispatchSummary(array $booking): array
+{
+    $distanceKm = (float) ($booking['distance_km'] ?? 18.5);
+    $vehicleType = (string) ($booking['vehicle_type'] ?? 'sedan');
+    $passengers = max(1, (int) ($booking['passengers'] ?? 1));
+
+    $dispatch = assignDriverForBooking([
+        'vehicle_type' => $vehicleType,
+        'passengers' => $passengers,
+    ]);
+
+    $fare = calculateTripFare([
+        'vehicle_type' => $vehicleType,
+        'distance_km' => $distanceKm,
+        'duration_minutes' => (int) ($booking['duration_minutes'] ?? 35),
+        'waiting_minutes' => (int) ($booking['waiting_minutes'] ?? 0),
+        'passengers' => $passengers,
+    ]);
+
+    $eta = getRouteEtaEstimate([
+        'distance_km' => $distanceKm,
+        'vehicle_type' => $vehicleType,
+    ]);
+
+    return [
+        'dispatch' => $dispatch,
+        'fare' => $fare,
+        'eta' => $eta,
+        'payment_methods' => getPaymentMethods(),
+    ];
+}
+
 function getHomepageData(): array
 {
     return [
@@ -464,6 +531,8 @@ function handleBookingSubmission(array $post): array
         'status' => $status,
         'created_at' => date('Y-m-d H:i:s'),
     ];
+
+    $booking['dispatch'] = buildTripDispatchSummary($booking);
 
     if (dbConnected()) {
         try {
