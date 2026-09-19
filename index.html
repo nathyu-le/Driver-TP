@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Airport Transfers</title>
+    <meta name="description" content="Premium transportation booking website with a clean luxury airport transfer experience." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container nav-wrap">
+        <div class="brand" aria-label="Airport transfer brand">
+          <div class="brand-mark">at</div>
+          <div class="brand-wordmark">
+            <span>airport</span>
+            <small>transfer.com</small>
+          </div>
+        </div>
+
+        <nav class="main-nav" aria-label="Main navigation">
+          <a href="#">Trang chủ</a>
+          <a href="#">Dịch vụ</a>
+          <a href="#">Tuyến đường</a>
+          <a href="#">Đội xe</a>
+          <a href="#">Bảng giá</a>
+          <a href="#">Tin tức</a>
+        </nav>
+
+        <div class="nav-tools">
+          <button class="lang-btn">VI</button>
+          <button class="ghost-search">Tìm kiếm</button>
+          <button class="sign-in">Đăng nhập</button>
+          <button class="cta-pill" aria-label="Đặt xe ngay">→</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="page-shell">
+      <section class="hero-section container">
+        <div class="hero-panel reveal">
+          <div class="hero-content">
+            <p class="mini-tag">Chuyến xe sân bay cao cấp</p>
+            <h1>Di chuyển thông minh với trải nghiệm đẳng cấp.</h1>
+            <p class="hero-text">
+              Đặt xe nhanh, đúng giờ và tiện nghi cho mọi hành trình.
+            </p>
+            <div class="hero-cta-row">
+              <button class="primary-btn" type="button">Đặt xe ngay</button>
+              <button class="secondary-btn" type="button">Khám phá dịch vụ</button>
+            </div>
+
+            <div class="trust-row" aria-label="Trust indicators">
+              <span>✓ Đúng giờ</span>
+              <span>✓ Xe sạch</span>
+              <span>✓ Hỗ trợ 24/7</span>
+            </div>
+          </div>
+
+          <div class="hero-visual" aria-hidden="true">
+            <div class="hero-badge-card">
+              <span>Hỗ trợ 24/7</span>
+              <strong>Đánh giá 4.9/5</strong>
+            </div>
+            <div class="person-card">
+              <div class="person-avatar"></div>
+              <div class="person-badge">at</div>
+            </div>
+            <div class="car-visual"></div>
+          </div>
+        </div>
+
+        <div class="trip-toggle reveal">
+          <button class="toggle active" type="button">Một chiều</button>
+          <button class="toggle" type="button">Khứ hồi</button>
+        </div>
+
+        <form class="booking-bar reveal" aria-label="Booking form">
+          <div class="input-block">
+            <label>Điểm đón</label>
+            <div class="input-field">
+              <span class="field-icon field-pick"></span>
+              <input type="text" value="Sân bay Đà Nẵng" aria-label="Điểm đón" />
+            </div>
+          </div>
+
+          <button class="swap-btn" type="button" aria-label="Đổi điểm">⇄</button>
+
+          <div class="input-block">
+            <label>Điểm đến</label>
+            <div class="input-field">
+              <span class="field-icon field-drop"></span>
+              <input type="text" value="Phố cổ Hội An" aria-label="Điểm đến" />
+            </div>
+          </div>
+
+          <div class="input-block">
+            <label>Giờ khởi hành</label>
+            <div class="input-field">
+              <span class="field-icon field-date"></span>
+              <input type="text" value="10/02/2026 12:00" aria-label="Giờ khởi hành" />
+            </div>
+          </div>
+
+          <div class="input-block">
+            <label>Hành khách</label>
+            <div class="input-field">
+              <span class="field-icon field-passenger"></span>
+              <input type="text" value="2" aria-label="Hành khách" />
+            </div>
+          </div>
+
+          <button class="search-btn" type="button">Tìm chuyến</button>
+        </form>
+      </section>
+
+      <section class="stats-strip container reveal">
+        <div class="stat-item">
+          <strong>12k+</strong>
+          <span>Chuyến</span>
+        </div>
+        <div class="stat-item">
+          <strong>98%</strong>
+          <span>Đúng giờ</span>
+        </div>
+        <div class="stat-item">
+          <strong>4.9/5</strong>
+          <span>Đánh giá</span>
+        </div>
+        <div class="stat-item">
+          <strong>24/7</strong>
+          <span>Hỗ trợ</span>
+        </div>
+      </section>
+
+      <section class="why-choose container reveal">
+        <div class="section-header">
+          <p>Vì sao chọn chúng tôi</p>
+          <h2>Vận chuyển tiện nghi, đúng giờ, chạm tay là xong.</h2>
+        </div>
+
+        <div class="showcase-layout">
+          <div class="showcase-panel">
+            <div class="showcase-topbar">
+              <span>Tổng quan đặt xe</span>
+              <span class="status-tag">Đã xác nhận</span>
+            </div>
+
+            <div class="summary-grid">
+              <div>
+                <label>Tuyến</label>
+                <strong>Đà Nẵng → Hội An</strong>
+              </div>
+              <div>
+                <label>Phương tiện</label>
+                <strong>Sedan cao cấp</strong>
+              </div>
+              <div>
+                <label>Thời gian</label>
+                <strong>09:45 SA</strong>
+              </div>
+              <div>
+                <label>Giá</label>
+                <strong>1.200.000đ</strong>
+              </div>
+            </div>
+
+            <div class="driver-row">
+              <div class="driver-avatar"></div>
+              <div>
+                <strong>Tài xế Nguyễn</strong>
+                <small>Chauffeur chuyên nghiệp</small>
+              </div>
+            </div>
+          </div>
+
+          <div class="benefit-grid">
+            <article class="benefit-card">
+              <div class="benefit-icon">01</div>
+              <h3>Giá minh bạch</h3>
+              <p>Rõ ràng trước khi đặt.</p>
+            </article>
+            <article class="benefit-card">
+              <div class="benefit-icon">02</div>
+              <h3>Tài xế chuyên nghiệp</h3>
+              <p>Đúng giờ, lịch sự và thân thiện.</p>
+            </article>
+            <article class="benefit-card">
+              <div class="benefit-icon">03</div>
+              <h3>Hỗ trợ chuyến bay</h3>
+              <p>Điều chỉnh lịch đón theo thời gian thực.</p>
+            </article>
+            <article class="benefit-card">
+              <div class="benefit-icon">04</div>
+              <h3>Đặt xe linh hoạt</h3>
+              <p>Đặc biệt cho sân bay và liên tỉnh.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="routes-section container reveal">
+        <div class="section-header compact">
+          <p>Tuyến phổ biến</p>
+          <h2>Những chặng đường được khách hàng yêu thích.</h2>
+        </div>
+
+        <div class="route-grid">
+          <article class="route-card">
+            <span class="route-badge">Sân bay</span>
+            <h3>Đà Nẵng → Hội An</h3>
+            <div class="route-meta"><span>45 phút</span><span>1.200.000đ</span></div>
+            <button type="button">Đặt ngay</button>
+          </article>
+          <article class="route-card">
+            <span class="route-badge">Xe riêng</span>
+            <h3>Đà Nẵng → Huế</h3>
+            <div class="route-meta"><span>2h 30m</span><span>2.500.000đ</span></div>
+            <button type="button">Đặt ngay</button>
+          </article>
+          <article class="route-card">
+            <span class="route-badge">Liên tỉnh</span>
+            <h3>Đà Nẵng → Quảng Ngãi</h3>
+            <div class="route-meta"><span>3h 15m</span><span>2.900.000đ</span></div>
+            <button type="button">Đặt ngay</button>
+          </article>
+          <article class="route-card">
+            <span class="route-badge">Sân bay</span>
+            <h3>Đà Nẵng → Tam Kỳ</h3>
+            <div class="route-meta"><span>1h 40m</span><span>1.950.000đ</span></div>
+            <button type="button">Đặt ngay</button>
+          </article>
+        </div>
+      </section>
+
+      <section class="fleet-section container reveal">
+        <div class="section-header compact">
+          <p>Đội xe</p>
+          <h2>Chọn xe theo nhu cầu.</h2>
+        </div>
+
+        <div class="fleet-grid">
+          <article class="fleet-card">
+            <div class="fleet-image car-sedan"></div>
+            <div class="fleet-body">
+              <h3>Sedan Executive</h3>
+              <ul>
+                <li>4 chỗ</li>
+                <li>Máy lạnh</li>
+                <li>Wi‑Fi</li>
+              </ul>
+              <div class="fleet-meta"><strong>1.200.000đ</strong><button type="button">Xem</button></div>
+            </div>
+          </article>
+          <article class="fleet-card">
+            <div class="fleet-image car-van"></div>
+            <div class="fleet-body">
+              <h3>Van Gia đình</h3>
+              <ul>
+                <li>7 chỗ</li>
+                <li>Không gian hành lý</li>
+                <li>Ghế trẻ em</li>
+              </ul>
+              <div class="fleet-meta"><strong>1.700.000đ</strong><button type="button">Xem</button></div>
+            </div>
+          </article>
+          <article class="fleet-card">
+            <div class="fleet-image car-limo"></div>
+            <div class="fleet-body">
+              <h3>Limousine cao cấp</h3>
+              <ul>
+                <li>4 chỗ</li>
+                <li>Nội thất da</li>
+                <li>Hỗ trợ concierge</li>
+              </ul>
+              <div class="fleet-meta"><strong>2.600.000đ</strong><button type="button">Xem</button></div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="steps-section container reveal">
+        <div class="section-header compact">
+          <p>Quy trình</p>
+          <h2>Đặt xe dễ như vậy.</h2>
+        </div>
+
+        <div class="steps-grid">
+          <div class="step-card">
+            <span>01</span>
+            <h3>Chọn tuyến</h3>
+            <p>Chọn điểm đón, điểm đến và thời gian di chuyển.</p>
+          </div>
+          <div class="step-card">
+            <span>02</span>
+            <h3>Chọn xe</h3>
+            <p>Lựa chọn phương tiện phù hợp với nhóm và ngân sách.</p>
+          </div>
+          <div class="step-card">
+            <span>03</span>
+            <h3>Xác nhận</h3>
+            <p>Kiểm tra chi tiết, thanh toán an toàn và nhận xác nhận ngay.</p>
+          </div>
+          <div class="step-card">
+            <span>04</span>
+            <h3>Trải nghiệm</h3>
+            <p>Đồng hành cùng tài xế và theo dõi vị trí xe theo thời gian thực.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="testimonial-section container reveal">
+        <div class="section-header compact">
+          <p>Khách hàng nói gì</p>
+          <h2>Khách tin tưởng vì quá rõ ràng.</h2>
+        </div>
+
+        <div class="testimonial-grid">
+          <article class="quote-card">
+            <div class="stars">★★★★★</div>
+            <p>“Tài xế rất lịch sự, xe sạch sẽ và đặt xe rất nhanh. Đây là lựa chọn đáng tin cậy cho chuyến sân bay.”</p>
+            <div class="person">Linh N.</div>
+          </article>
+          <article class="quote-card">
+            <div class="stars">★★★★★</div>
+            <p>“Chúng tôi dùng cho chuyến công tác và mọi thứ đều đúng giờ, chuyên nghiệp từ lúc đón đến lúc trả khách.”</p>
+            <div class="person">Daniel C.</div>
+          </article>
+          <article class="quote-card">
+            <div class="stars">★★★★★</div>
+            <p>“Xe sang, dịch vụ tốt, và bộ phận hỗ trợ phản hồi rất nhanh khi có thay đổi lịch trình.”</p>
+            <div class="person">Minh P.</div>
+          </article>
+        </div>
+      </section>
+
+      <section class="pricing-section container reveal">
+        <div class="section-header compact">
+          <p>Bảng giá</p>
+          <h2>Mức giá rõ ràng, dễ chọn.</h2>
+        </div>
+
+        <div class="pricing-grid">
+          <article class="pricing-card">
+            <span class="pricing-tag">Tiêu chuẩn</span>
+            <h3>Xe 4 chỗ</h3>
+            <div class="price">1.200.000đ</div>
+            <ul>
+              <li>Đón sân bay nội thành</li>
+              <li>Hỗ trợ 1 hành lý</li>
+              <li>Giá đã bao gồm VAT</li>
+            </ul>
+          </article>
+          <article class="pricing-card featured">
+            <span class="pricing-tag">Phổ biến</span>
+            <h3>Xe 7 chỗ</h3>
+            <div class="price">1.700.000đ</div>
+            <ul>
+              <li>Phù hợp gia đình và nhóm nhỏ</li>
+              <li>Không gian hành lý rộng</li>
+              <li>Hỗ trợ ưu tiên khứ hồi</li>
+            </ul>
+          </article>
+          <article class="pricing-card">
+            <span class="pricing-tag">Cao cấp</span>
+            <h3>Limousine</h3>
+            <div class="price">2.600.000đ</div>
+            <ul>
+              <li>Nội thất da cao cấp</li>
+              <li>Chấp nhận đặt xe riêng</li>
+              <li>Phục vụ doanh nghiệp</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section class="faq-section container reveal">
+        <div class="section-header compact">
+          <p>Câu hỏi thường gặp</p>
+          <h2>Thông tin nhanh để bạn dễ quyết định.</h2>
+        </div>
+
+        <div class="faq-list">
+          <details open>
+            <summary>Đặt xe có cần thanh toán trước không?</summary>
+            <p>Bạn có thể thanh toán trước hoặc đặt cọc tùy phương thức, và hệ thống sẽ xác nhận nhanh qua tin nhắn hoặc email.</p>
+          </details>
+          <details>
+            <summary>Xe có hỗ trợ trẻ em hoặc hành lý lớn không?</summary>
+            <p>Chúng tôi hỗ trợ ghế trẻ em, hành lý lớn và lựa chọn xe theo số hành khách, bạn có thể thông báo khi đặt.</p>
+          </details>
+          <details>
+            <summary>Nếu chuyến bay bị chậm trễ thì sao?</summary>
+            <p>Hệ thống sẽ tự động cập nhật thời gian đón và tài xế sẽ chờ theo thông tin thực tế của hành trình nếu có thay đổi.</p>
+          </details>
+          <details>
+            <summary>Chuyến đi liên tỉnh có được đặt tối đa bao nhiêu người?</summary>
+            <p>Phụ thuộc từng dòng xe, nhưng bạn có thể chọn từ 4 chỗ, 7 chỗ hoặc xe phù hợp nhóm từ 10–16 chỗ theo nhu cầu.</p>
+          </details>
+        </div>
+      </section>
+
+      <section class="cta-section container reveal">
+        <div class="cta-box">
+          <div>
+            <p>Thuê xe riêng</p>
+            <h2>Đặt xe nhanh trong 2 phút.</h2>
+          </div>
+          <button type="button">Bắt đầu</button>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-grid">
+        <div>
+          <div class="brand footer-brand">
+            <div class="brand-mark">at</div>
+            <div class="brand-wordmark">
+              <span>airport</span>
+              <small>transfer.com</small>
+            </div>
+          </div>
+          <p>Vận chuyển sân bay, du lịch và liên tỉnh với dịch vụ rõ ràng, đúng giờ và chuyên nghiệp.</p>
+        </div>
+        <div>
+          <h4>Dịch vụ</h4>
+          <ul>
+            <li>Đón sân bay</li>
+            <li>Thuê xe riêng</li>
+            <li>Xe liên tỉnh</li>
+            <li>Limousine</li>
+          </ul>
+        </div>
+        <div>
+          <h4>Tuyến đường</h4>
+          <ul>
+            <li>Đà Nẵng – Hội An</li>
+            <li>Đà Nẵng – Huế</li>
+            <li>Đà Nẵng – Tam Kỳ</li>
+            <li>Đà Nẵng – Quảng Ngãi</li>
+          </ul>
+        </div>
+        <div>
+          <h4>Liên hệ</h4>
+          <ul>
+            <li>Hotline: 0909 999 999</li>
+            <li>Email: hello@airporttransfer.com</li>
+            <li>Địa chỉ: Đà Nẵng</li>
+            <li>Mon – Sun: 24/7</li>
+          </ul>
+        </div>
+      </div>
+      <div class="container footer-bottom">
+        <span>© 2026 Airport Transfer</span>
+        <span>Chính sách bảo mật</span>
+      </div>
+    </footer>
+
+    <div class="auth-modal" id="authModal" aria-hidden="true">
+      <div class="auth-dialog">
+        <button class="close-modal" type="button" aria-label="Close">×</button>
+        <div class="auth-header">
+          <p>Xin chào</p>
+          <h3 id="authTitle">Đăng nhập</h3>
+        </div>
+
+        <div class="auth-tabs">
+          <button class="tab active" data-mode="login" type="button">Đăng nhập</button>
+          <button class="tab" data-mode="signup" type="button">Đăng ký</button>
+        </div>
+
+        <form class="auth-form">
+          <div class="field-group">
+            <label>Email</label>
+            <input type="email" placeholder="you@example.com" />
+          </div>
+          <div class="field-group">
+            <label>Mật khẩu</label>
+            <input type="password" placeholder="••••••••" />
+          </div>
+          <div class="field-group signup-only hidden">
+            <label>Họ và tên</label>
+            <input type="text" placeholder="Nhập tên của bạn" />
+          </div>
+          <button class="auth-submit" type="submit">Tiếp tục</button>
+        </form>
+      </div>
+    </div>
+
+    <button class="floating-chat" type="button" aria-label="Chat support">✦</button>
+
+    <script src="script.js"></script>
+  </body>
+</html>
