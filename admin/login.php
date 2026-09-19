@@ -10,9 +10,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = safeString($_POST['username'] ?? '');
     $password = safeString($_POST['password'] ?? '');
 
-    if ($username === 'admin' && $password === 'admin123') {
-        $_SESSION['admin_logged_in'] = true;
-        $_SESSION['admin_user'] = ['name' => 'System Admin'];
+    $user = verifyAdminCredentials($username, $password);
+
+    if ($user !== null) {
+        loginAdmin($user);
         redirect('/admin/dashboard.php');
     }
 

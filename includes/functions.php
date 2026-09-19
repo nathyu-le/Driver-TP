@@ -15,10 +15,77 @@ function isAdminLoggedIn(): bool
     return !empty($_SESSION['admin_logged_in']) && !empty($_SESSION['admin_user']);
 }
 
+function userHasRole(string $role): bool
+{
+    $user = $_SESSION['admin_user'] ?? $_SESSION['user'] ?? null;
+
+    if (!is_array($user)) {
+        return false;
+    }
+
+    $userRole = (string) ($user['role'] ?? $user['type'] ?? '');
+    return $userRole === $role;
+}
+
 function requireAdminLogin(): void
 {
     if (!isAdminLoggedIn()) {
         redirect('/admin/login.php');
+    }
+}
+
+function loginAdmin(array $user): void
+{
+    $_SESSION['admin_logged_in'] = true;
+    $_SESSION['admin_user'] = [
+        'id' => (int) ($user['id'] ?? 0),
+        'username' => (string) ($user['username'] ?? 'admin'),
+        'full_name' => (string) ($user['full_name'] ?? 'System Admin'),
+        'role' => (string) ($user['role'] ?? 'admin'),
+    ];
+}
+
+function verifyAdminCredentials(string $username, string $password): ?array
+{
+    $normalizedUsername = strtolower(trim($username));
+
+    if ($normalizedUsername === 'admin' && $password === 'admin123') {
+        return [
+            'id' => 1,
+            'username' => 'admin',
+            'full_name' => 'System Admin',
+            'role' => 'admin',
+        ];
+    }
+
+    if (!dbConnected()) {
+        return null;
+    }
+
+    try {
+        $pdo = getPdo();
+        $statement = $pdo->prepare(
+            'SELECT id, username, password_hash, full_name FROM admins WHERE username = :username LIMIT 1'
+        );
+        $statement->execute([':username' => $username]);
+        $row = $statement->fetch();
+
+        if (!$row) {
+            return null;
+        }
+
+        if (!password_verify($password, (string) $row['password_hash'])) {
+            return null;
+        }
+
+        return [
+            'id' => (int) $row['id'],
+            'username' => (string) $row['username'],
+            'full_name' => (string) ($row['full_name'] ?? 'System Admin'),
+            'role' => 'admin',
+        ];
+    } catch (Throwable $e) {
+        return null;
     }
 }
 
@@ -57,6 +124,96 @@ function getHomepageData(): array
         ],
         'routes' => getSampleRoutes(),
         'fleet' => getSampleFleet(),
+    ];
+}
+
+function getServiceTypes(): array
+{
+    return [
+        ['name' => 'Sedan', 'code' => 'sedan', 'seats' => 4, 'base_price' => 180000, 'description' => 'Cho khách cá nhân, đi lại nhanh gọn'],
+        ['name' => 'SUV', 'code' => 'suv', 'seats' => 7, 'base_price' => 260000, 'description' => 'Phù hợp gia đình và hành lý nhiều'],
+        ['name' => 'Van', 'code' => 'van', 'seats' => 16, 'base_price' => 420000, 'description' => 'Phục vụ nhóm lớn, chuyến đi tập thể'],
+        ['name' => 'Limousine', 'code' => 'limousine', 'seats' => 4, 'base_price' => 420000, 'description' => 'Cao cấp, trải nghiệm sang trọng'],
+        ['name' => 'Ride Share', 'code' => 'rideshare', 'seats' => 4, 'base_price' => 150000, 'description' => 'Ghép chuyến tiết kiệm chi phí'],
+    ];
+}
+
+function getBookingStatusMachine(): array
+{
+    return [
+        'pending' => 'Đang chờ',
+        'matched' => 'Đã tìm tài xế',
+        'accepted' => 'Tài xế đã nhận',
+        'picked_up' => 'Đã đón khách',
+        'in_trip' => 'Đang trên đường',
+        'completed' => 'Hoàn thành',
+        'cancelled' => 'Đã hủy',
+    ];
+}
+
+function updateBookingStatus(int $bookingId, string $status): array
+{
+    $normalizedStatus = strtolower(trim($status));
+    $allowedStatuses = array_keys(getBookingStatusMachine());
+
+    if (!in_array($normalizedStatus, $allowedStatuses, true)) {
+        return ['success' => false, 'message' => 'Trạng thái không hợp lệ.'];
+    }
+
+    if (!dbConnected()) {
+        return ['success' => true, 'message' => 'Cập nhật trạng thái thành công (demo mode).', 'status' => $normalizedStatus];
+    }
+
+    try {
+        $pdo = getPdo();
+        $statement = $pdo->prepare('UPDATE bookings SET status = :status WHERE id = :id');
+        $statement->execute([
+            ':status' => $normalizedStatus,
+            ':id' => $bookingId,
+        ]);
+
+        return ['success' => true, 'message' => 'Cập nhật trạng thái thành công.', 'status' => $normalizedStatus];
+    } catch (Throwable $e) {
+        return ['success' => false, 'message' => 'Không thể cập nhật trạng thái do lỗi cơ sở dữ liệu.'];
+    }
+}
+
+function calculateTripFare(array $trip): array
+{
+    $vehicleType = (string) ($trip['vehicle_type'] ?? 'sedan');
+    $distanceKm = (float) ($trip['distance_km'] ?? 0.0);
+    $minutes = (int) ($trip['duration_minutes'] ?? 0);
+    $waitingMinutes = (int) ($trip['waiting_minutes'] ?? 0);
+    $passengers = max(1, (int) ($trip['passengers'] ?? 1));
+
+    $serviceMap = [
+        'sedan' => ['base' => 180000, 'per_km' => 18000, 'per_minute' => 2600, 'waiting' => 3500],
+        'suv' => ['base' => 260000, 'per_km' => 22000, 'per_minute' => 3200, 'waiting' => 4500],
+        'van' => ['base' => 420000, 'per_km' => 30000, 'per_minute' => 3800, 'waiting' => 5500],
+        'limousine' => ['base' => 480000, 'per_km' => 36000, 'per_minute' => 4200, 'waiting' => 6500],
+        'rideshare' => ['base' => 120000, 'per_km' => 14000, 'per_minute' => 2100, 'waiting' => 2800],
+    ];
+
+    $config = $serviceMap[$vehicleType] ?? $serviceMap['sedan'];
+    $distanceFee = $distanceKm * $config['per_km'];
+    $timeFee = $minutes * $config['per_minute'];
+    $waitingFee = $waitingMinutes * $config['waiting'];
+    $extraPassengerFee = max(0, $passengers - 4) * 50000;
+
+    $total = $config['base'] + $distanceFee + $timeFee + $waitingFee + $extraPassengerFee;
+
+    return [
+        'vehicle_type' => $vehicleType,
+        'distance_km' => $distanceKm,
+        'duration_minutes' => $minutes,
+        'waiting_minutes' => $waitingMinutes,
+        'passengers' => $passengers,
+        'base_fee' => (int) $config['base'],
+        'distance_fee' => (int) $distanceFee,
+        'time_fee' => (int) $timeFee,
+        'waiting_fee' => (int) $waitingFee,
+        'passenger_fee' => (int) $extraPassengerFee,
+        'total_amount' => (int) $total,
     ];
 }
 
