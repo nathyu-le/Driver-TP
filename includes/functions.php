@@ -104,12 +104,196 @@ function getSampleRoutes(): array
     ];
 }
 
+function getRoutesList(): array
+{
+    if (!dbConnected()) {
+        return getSampleRoutes();
+    }
+
+    try {
+        $pdo = getPdo();
+        $statement = $pdo->query('SELECT * FROM routes ORDER BY id DESC LIMIT 20');
+        $rows = $statement->fetchAll();
+
+        if (!$rows) {
+            return getSampleRoutes();
+        }
+
+        return array_map(static function (array $row): array {
+            return [
+                'id' => (int) ($row['id'] ?? 0),
+                'title' => (string) ($row['name'] ?? 'Tuyến đường'),
+                'duration' => ((int) ($row['duration_minutes'] ?? 0)) . ' phút',
+                'price' => number_format((float) ($row['base_price'] ?? 0), 0, ',', '.') . 'đ',
+                'start_point' => (string) ($row['start_point'] ?? ''),
+                'end_point' => (string) ($row['end_point'] ?? ''),
+            ];
+        }, $rows);
+    } catch (Throwable $e) {
+        return getSampleRoutes();
+    }
+}
+
 function getSampleFleet(): array
 {
     return [
         ['name' => 'Sedan Executive', 'seats' => '4 chỗ', 'features' => ['Máy lạnh', 'Wi‑Fi', 'Chuyên nghiệp'], 'price' => '1.200.000đ'],
         ['name' => 'Van Gia đình', 'seats' => '7 chỗ', 'features' => ['Hành lý rộng', 'An toàn', 'Ghế trẻ em'], 'price' => '1.700.000đ'],
         ['name' => 'Limousine cao cấp', 'seats' => '4 chỗ', 'features' => ['Nội thất da', 'Concierge', 'Cao cấp'], 'price' => '2.600.000đ'],
+    ];
+}
+
+function getVehiclesList(): array
+{
+    if (!dbConnected()) {
+        return getSampleFleet();
+    }
+
+    try {
+        $pdo = getPdo();
+        $statement = $pdo->query('SELECT * FROM vehicles ORDER BY id DESC LIMIT 20');
+        $rows = $statement->fetchAll();
+
+        if (!$rows) {
+            return getSampleFleet();
+        }
+
+        return array_map(static function (array $row): array {
+            $vehicleType = (string) ($row['vehicle_type'] ?? 'sedan');
+            $features = [
+                'Máy lạnh',
+                'Vệ sinh sạch sẽ',
+                $vehicleType === 'limousine' ? 'Nội thất cao cấp' : 'An toàn',
+                'Hỗ trợ khách hàng',
+            ];
+
+            return [
+                'id' => (int) ($row['id'] ?? 0),
+                'name' => (string) ($row['name'] ?? 'Xe dịch vụ'),
+                'seats' => ((int) ($row['seats'] ?? 4)) . ' chỗ',
+                'features' => $features,
+                'price' => number_format((float) ($row['base_price'] ?? 0), 0, ',', '.') . 'đ',
+                'status' => (string) ($row['status'] ?? 'active'),
+            ];
+        }, $rows);
+    } catch (Throwable $e) {
+        return getSampleFleet();
+    }
+}
+
+function createRoute(array $data): array
+{
+    $name = safeString($data['name'] ?? '');
+    $startPoint = safeString($data['start_point'] ?? '');
+    $endPoint = safeString($data['end_point'] ?? '');
+    $durationMinutes = (int) ($data['duration_minutes'] ?? 0);
+    $basePrice = (float) ($data['base_price'] ?? 0);
+
+    if ($name === '' || $startPoint === '' || $endPoint === '') {
+        return ['success' => false, 'message' => 'Vui lòng nhập tên tuyến, điểm đi và điểm đến.'];
+    }
+
+    if (!dbConnected()) {
+        return ['success' => true, 'message' => 'Tuyến mới đã được lưu trong chế độ demo.', 'route' => ['name' => $name, 'start_point' => $startPoint, 'end_point' => $endPoint]];
+    }
+
+    try {
+        $pdo = getPdo();
+        $statement = $pdo->prepare(
+            'INSERT INTO routes (name, start_point, end_point, duration_minutes, base_price, status) VALUES (:name, :start_point, :end_point, :duration_minutes, :base_price, :status)'
+        );
+        $statement->execute([
+            ':name' => $name,
+            ':start_point' => $startPoint,
+            ':end_point' => $endPoint,
+            ':duration_minutes' => $durationMinutes ?: 60,
+            ':base_price' => $basePrice ?: 0,
+            ':status' => 'active',
+        ]);
+
+        return ['success' => true, 'message' => 'Tuyến đường mới đã được thêm thành công.', 'route' => ['id' => (int) $pdo->lastInsertId()]];
+    } catch (Throwable $e) {
+        return ['success' => false, 'message' => 'Không thể lưu tuyến đường vào cơ sở dữ liệu.'];
+    }
+}
+
+function createVehicle(array $data): array
+{
+    $name = safeString($data['name'] ?? '');
+    $vehicleType = safeString($data['vehicle_type'] ?? 'sedan');
+    $seats = max(1, (int) ($data['seats'] ?? 4));
+    $basePrice = (float) ($data['base_price'] ?? 0);
+
+    if ($name === '') {
+        return ['success' => false, 'message' => 'Vui lòng nhập tên xe.'];
+    }
+
+    if (!dbConnected()) {
+        return ['success' => true, 'message' => 'Xe mới đã được lưu trong chế độ demo.', 'vehicle' => ['name' => $name, 'vehicle_type' => $vehicleType]];
+    }
+
+    try {
+        $pdo = getPdo();
+        $statement = $pdo->prepare(
+            'INSERT INTO vehicles (name, vehicle_type, seats, status, base_price) VALUES (:name, :vehicle_type, :seats, :status, :base_price)'
+        );
+        $statement->execute([
+            ':name' => $name,
+            ':vehicle_type' => $vehicleType,
+            ':seats' => $seats,
+            ':status' => 'active',
+            ':base_price' => $basePrice ?: 0,
+        ]);
+
+        return ['success' => true, 'message' => 'Xe mới đã được thêm thành công.', 'vehicle' => ['id' => (int) $pdo->lastInsertId()]];
+    } catch (Throwable $e) {
+        return ['success' => false, 'message' => 'Không thể lưu xe mới vào cơ sở dữ liệu.'];
+    }
+}
+
+function getDriverStatusMachine(): array
+{
+    return [
+        'offline' => 'Ngoại tuyến',
+        'available' => 'Sẵn sàng',
+        'busy' => 'Đang chở khách',
+        'on_break' => 'Nghỉ ngơi',
+        'suspended' => 'Tạm khóa',
+    ];
+}
+
+function getDispatchCandidates(string $vehicleType, int $passengers): array
+{
+    $drivers = [
+        ['id' => 101, 'name' => 'Nguyễn Văn A', 'vehicle_type' => 'sedan', 'status' => 'available', 'distance_km' => 3.2, 'rating' => 4.9],
+        ['id' => 102, 'name' => 'Trần Văn B', 'vehicle_type' => 'suv', 'status' => 'available', 'distance_km' => 4.8, 'rating' => 4.8],
+        ['id' => 103, 'name' => 'Lê Thị C', 'vehicle_type' => 'van', 'status' => 'busy', 'distance_km' => 7.4, 'rating' => 4.7],
+        ['id' => 104, 'name' => 'Phạm Văn D', 'vehicle_type' => 'limousine', 'status' => 'available', 'distance_km' => 5.6, 'rating' => 5.0],
+        ['id' => 105, 'name' => 'Hoàng Minh E', 'vehicle_type' => 'rideshare', 'status' => 'available', 'distance_km' => 2.9, 'rating' => 4.8],
+    ];
+
+    return array_values(array_filter($drivers, static function (array $driver) use ($vehicleType, $passengers): bool {
+        $matchesType = $driver['vehicle_type'] === $vehicleType || $driver['vehicle_type'] === 'rideshare';
+        $matchesCapacity = ($passengers <= 4 && in_array($driver['vehicle_type'], ['sedan', 'limousine', 'rideshare'], true)) || ($passengers <= 7 && $driver['vehicle_type'] === 'suv') || ($passengers <= 16 && $driver['vehicle_type'] === 'van');
+        return $matchesType && $matchesCapacity && $driver['status'] === 'available';
+    }));
+}
+
+function assignDriverForBooking(array $booking): array
+{
+    $vehicleType = (string) ($booking['vehicle_type'] ?? 'sedan');
+    $passengers = max(1, (int) ($booking['passengers'] ?? 1));
+    $candidates = getDispatchCandidates($vehicleType, $passengers);
+
+    if (!$candidates) {
+        return ['success' => false, 'message' => 'Hiện không có tài xế phù hợp cho loại xe này.'];
+    }
+
+    $selected = $candidates[0];
+    return [
+        'success' => true,
+        'driver' => $selected,
+        'message' => 'Đã tìm được tài xế ' . $selected['name'] . ' cho chuyến này.',
     ];
 }
 

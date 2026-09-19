@@ -4,6 +4,14 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../includes/functions.php';
 requireAdminLogin();
+
+$vehicleMessage = '';
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['vehicle_submit'])) {
+    $result = createVehicle($_POST);
+    $vehicleMessage = $result['message'];
+}
+
+$vehicles = getVehiclesList();
 $pageTitle = 'Quản lý xe & tài xế';
 require __DIR__ . '/../includes/header.php';
 ?>
@@ -30,14 +38,47 @@ require __DIR__ . '/../includes/header.php';
         </div>
 
         <div class="admin-panel vehicles-panel">
-            <?php foreach (getSampleFleet() as $vehicle): ?>
+            <?php if ($vehicleMessage): ?>
+                <div class="form-status success"><?= htmlspecialchars($vehicleMessage, ENT_QUOTES, 'UTF-8'); ?></div>
+            <?php endif; ?>
+
+            <form method="post" action="/admin/vehicles.php" class="admin-form compact-form">
+                <input type="hidden" name="vehicle_submit" value="1" />
+                <div class="two-col-grid">
+                    <label>
+                        <span>Tên xe</span>
+                        <input type="text" name="name" placeholder="Ví dụ: SUV Executive" required />
+                    </label>
+                    <label>
+                        <span>Loại xe</span>
+                        <select name="vehicle_type">
+                            <option value="sedan">Sedan</option>
+                            <option value="suv">SUV</option>
+                            <option value="van">Van</option>
+                            <option value="limousine">Limousine</option>
+                            <option value="rideshare">Ride Share</option>
+                        </select>
+                    </label>
+                    <label>
+                        <span>Số chỗ</span>
+                        <input type="number" name="seats" value="4" min="1" max="16" />
+                    </label>
+                    <label>
+                        <span>Giá cơ bản</span>
+                        <input type="number" name="base_price" value="1200000" min="0" />
+                    </label>
+                </div>
+                <button type="submit" class="primary-btn">Thêm xe</button>
+            </form>
+
+            <?php foreach ($vehicles as $vehicle): ?>
                 <div class="vehicle-card">
                     <div class="vehicle-thumb"></div>
                     <div>
-                        <strong><?= htmlspecialchars($vehicle['name'], ENT_QUOTES, 'UTF-8'); ?></strong>
-                        <p><?= htmlspecialchars(implode(' • ', $vehicle['features']), ENT_QUOTES, 'UTF-8'); ?></p>
+                        <strong><?= htmlspecialchars((string) ($vehicle['name'] ?? 'Xe dịch vụ'), ENT_QUOTES, 'UTF-8'); ?></strong>
+                        <p><?= htmlspecialchars(implode(' • ', (array) ($vehicle['features'] ?? ['An toàn', 'Tiện nghi'])), ENT_QUOTES, 'UTF-8'); ?></p>
                     </div>
-                    <span><?= htmlspecialchars($vehicle['price'], ENT_QUOTES, 'UTF-8'); ?></span>
+                    <span><?= htmlspecialchars((string) ($vehicle['price'] ?? '—'), ENT_QUOTES, 'UTF-8'); ?></span>
                 </div>
             <?php endforeach; ?>
         </div>
